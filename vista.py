@@ -1,31 +1,24 @@
 from tkinter import StringVar
-from tkinter import Label
 from tkinter import LabelFrame
+from tkinter import Label
 from tkinter import Entry
-from tkinter import ttk
 from tkinter import Button
 from tkinter import Menu
+from tkinter import ttk
 from tkcalendar import Calendar
-from modelo import click_nombre
-from modelo import click_contacto
-from modelo import click_apellido
-from modelo import on_focus_nombre
-from modelo import on_focus_apellido
-from modelo import on_focus_contacto
 from modelo import funcion_reserva
 from modelo import funcion_modificar
 from modelo import funcion_cancelar
 from modelo import funcion_consultar
 from modelo import funcion_color
 from modelo import funcion_salir
-
-################################################################################
-# VISTA PRINCIPAL ##############################################################
-################################################################################
+from modelo import titulo_app
+from modelo import crear_tabla
+from modelo import crear_base
 
 
 def vista_principal(main):
-    titulo_app = "Syntia SPA"
+
     main.title(titulo_app)
     main.geometry("675x615")
     main.resizable(width=False, height=False)
@@ -51,12 +44,32 @@ def vista_principal(main):
     entry_nombre = Entry(recuadro, textvariable=var_nombre, width=25)
     entry_nombre.grid(row=0, column=2, sticky="w")
     entry_nombre.focus_set()
+
+    def click_nombre(event):
+        entry_nombre.delete(0, "end")
+        entry_nombre.config(foreground="black")
+
+    def on_focus_nombre(event):
+        if var_nombre.get() == "":
+            entry_nombre.insert(0, "-----")
+            entry_nombre.config(foreground="grey")
+
     entry_nombre.bind("<Button-1>", click_nombre)
     entry_nombre.bind("<FocusIn>", on_focus_nombre)
     entry_apellido = Entry(recuadro, textvariable=var_apellido, width=25)
     entry_apellido.grid(row=1, column=2, sticky="w")
     entry_apellido.config(fg="grey")
     entry_apellido.insert(0, "-----")
+
+    def click_apellido(event):
+        entry_apellido.delete(0, "end")
+        entry_apellido.config(foreground="black")
+
+    def on_focus_apellido(event):
+        if var_apellido.get() == "":
+            entry_apellido.insert(0, "-----")
+            entry_apellido.config(foreground="grey")
+
     entry_apellido.bind("<Button-1>", click_apellido)
     entry_apellido.bind("<FocusIn>", on_focus_apellido)
     entry_contacto = Entry(
@@ -67,6 +80,16 @@ def vista_principal(main):
     entry_contacto.grid(row=2, column=2, sticky="w")
     entry_contacto.config(fg="grey")
     entry_contacto.insert(0, "Sin espacios y sin simbolos")
+
+    def click_contacto(event):
+        entry_contacto.delete(0, "end")
+        entry_contacto.config(foreground="black")
+
+    def on_focus_contacto(event):
+        if var_celular.get() == "":
+            entry_contacto.insert(0, "Sin espacios y sin simbolos")
+            entry_contacto.config(foreground="grey")
+
     entry_contacto.bind("<Button-1>", click_contacto)
     entry_contacto.bind("<FocusIn>", on_focus_contacto)
     combo = ttk.Combobox(
@@ -106,22 +129,22 @@ def vista_principal(main):
         ),
         bg="green",
     )
-    boton_guardar.grid(row=5, column=1, sticky="w + e")
+    boton_guardar.grid(row=5, column=1, sticky="w" + "e")
 
     boton_eliminar = Button(
         recuadro,
         text="Cancelar Turno",
         width=25,
-        command=lambda: funcion_cancelar(),
+        command=lambda: funcion_cancelar(tree),
         bg="red",
     )
-    boton_eliminar.grid(row=6, column=2, sticky="w + e")
+    boton_eliminar.grid(row=6, column=2, sticky="w" + "e")
 
     boton_consultar = Button(
         recuadro,
         text="Consultar",
         width=25,
-        command=lambda: funcion_consultar(),
+        command=lambda: funcion_consultar(tree),
         bg="yellow",
     )
     boton_consultar.grid(row=6, column=1, sticky="w")
@@ -143,9 +166,9 @@ def vista_principal(main):
     boton_modificar.grid(row=5, column=2, sticky="w")
 
     boton_salir = Button(
-        main, text="Salir", width=25, command=lambda: funcion_salir(), bg="red"
+        main, text="Salir", width=25, command=lambda: funcion_salir(main), bg="red"
     )
-    boton_salir.grid(row=7, column=0, columnspan=2, sticky="w + e", padx=10)
+    boton_salir.grid(row=7, column=0, columnspan=2, sticky="w" + "e", padx=10)
 
     ################################################################################
     # MENU #########################################################################
@@ -165,13 +188,15 @@ def vista_principal(main):
             tree,
         ),
     )
-    menu_archivo.add_command(label="Cancelar Turno", command=lambda: funcion_cancelar())
-    menu_archivo.add_separator()
     menu_archivo.add_command(
-        label="Consultar Turnos", command=lambda: funcion_consultar()
+        label="Cancelar Turno", command=lambda: funcion_cancelar(tree)
     )
     menu_archivo.add_separator()
-    menu_archivo.add_command(label="Salir", command=lambda: funcion_salir())
+    menu_archivo.add_command(
+        label="Consultar Turnos", command=lambda: funcion_consultar(tree)
+    )
+    menu_archivo.add_separator()
+    menu_archivo.add_command(label="Salir", command=lambda: funcion_salir(main))
     menubar.add_cascade(label="Archivo", menu=menu_archivo)
 
     menu_edicion = Menu(menubar, tearoff=0)
@@ -190,7 +215,7 @@ def vista_principal(main):
     menubar.add_cascade(label="Editar", menu=menu_edicion)
 
     submenu = Menu(menu_edicion, tearoff=0)
-    submenu.add_command(label="Color de fondo", command=lambda: funcion_color())
+    submenu.add_command(label="Color de fondo", command=lambda: funcion_color(main))
     menu_edicion.add_cascade(label="Otros", menu=submenu)
 
     main.config(menu=menubar)
@@ -214,11 +239,12 @@ def vista_principal(main):
         bg="lightgreen",
         fg="blue",
     )
-    boton_seleccionar.grid(row=1, column=0, sticky="w + e")
+    boton_seleccionar.grid(row=1, column=0, sticky="w" + "e")
     date = Label(
         recuadro, text="Seleccione fecha en calendario", bg="black", fg="yellow"
     )
     date.grid(row=3, column=2, sticky="w")
+
     ################################################################################
     # TREEVIEW #####################################################################
     ################################################################################
@@ -237,4 +263,4 @@ def vista_principal(main):
     tree.heading("col3", text="Nombre")
     tree.heading("col4", text="Apellido")
     tree.heading("col5", text="Contacto")
-    tree.grid(row=6, column=0, columnspan=2, sticky="w + e", padx=10)
+    tree.grid(row=6, column=0, columnspan=2, sticky="w" + "e", padx=10)

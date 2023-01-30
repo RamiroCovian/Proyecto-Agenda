@@ -1,22 +1,14 @@
 import sqlite3
 import re
-from tkinter.messagebox import showinfo
-from tkinter.messagebox import showerror
-from tkinter.messagebox import askyesno
+from tkinter import ttk
 from tkinter.colorchooser import askcolor
+from tkinter.messagebox import showerror
+from tkinter.messagebox import showinfo
+from tkinter.messagebox import askyesno
 
-from vista import titulo_app
-from vista import combo
-from vista import main
-from vista import tree
-from vista import END
-from vista import entry_nombre
-from vista import entry_apellido
-from vista import entry_contacto
-from vista import var_nombre
-from vista import var_apellido
-from vista import var_celular
 
+el_id = 0
+titulo_app = "Syntia SPA"
 
 ################################################################################
 # BASE DE DATOS ################################################################
@@ -37,6 +29,7 @@ def crear_tabla(con):
 
 con = crear_base()
 crear_tabla(con)
+
 
 ################################################################################
 # FUNCIONES ####################################################################
@@ -59,8 +52,6 @@ def funcion_reserva(fecha, hora, nombre, apellido, contacto, tree):
                 con.commit()
                 actualizar_treeview(tree)
                 showinfo(titulo_app, "Turno reservado")
-                entry_nombre.focus_set()
-                var_nombre.set("-----")
             else:
                 showerror(
                     "¡¡Atencion!",
@@ -72,7 +63,7 @@ def funcion_reserva(fecha, hora, nombre, apellido, contacto, tree):
         showerror("¡Atencion!", "¡Debe ingresar el Nombre!")
 
 
-def funcion_cancelar():
+def funcion_cancelar(tree):
     if askyesno(
         "¡Atencion!", "Usted esta a punto de cancelar el turno, ¿Desea continuar?"
     ):
@@ -123,11 +114,11 @@ def funcion_modificar(fecha, hora, nombre, apellido, contacto, tree):
         showerror("Atencion", "¡Debe ingresar el Nombre!")
 
 
-def funcion_consultar():
+def funcion_consultar(tree):
     actualizar_treeview(tree)
 
 
-def funcion_salir():
+def funcion_salir(main):
     if askyesno("Atencion", "¿Esta seguro que desea salir?"):
         main.quit()
 
@@ -150,46 +141,8 @@ def actualizar_treeview(tree):
             text=fila[0],
             values=(fila[1], fila[2], fila[3], fila[4], fila[5]),
         )
-    entry_nombre.focus_set()
-    var_nombre.set("-----")
-    var_apellido.set("-----")
-    var_celular.set("Sin espacios y sin simbolos")
-    combo.set("Seleccione Hora")
 
 
-def funcion_color():
+def funcion_color(main):
     resultado = askcolor(color="#00ff00", title="Elija color")
     main.config(bg=resultado[1])
-
-
-def click_nombre(event):
-    entry_nombre.delete(0, END)
-    entry_nombre.config(foreground="black")
-
-
-def on_focus_nombre(event):
-    if var_nombre.get() == "":
-        entry_nombre.insert(0, "-----")
-        entry_nombre.config(foreground="grey")
-
-
-def click_apellido(event):
-    entry_apellido.delete(0, END)
-    entry_apellido.config(foreground="black")
-
-
-def on_focus_apellido(event):
-    if var_apellido.get() == "":
-        entry_apellido.insert(0, "-----")
-        entry_apellido.config(foreground="grey")
-
-
-def click_contacto(event):
-    entry_contacto.delete(0, END)
-    entry_contacto.config(foreground="black")
-
-
-def on_focus_contacto(event):
-    if var_celular.get() == "":
-        entry_contacto.insert(0, "Sin espacios y sin simbolos")
-        entry_contacto.config(foreground="grey")
